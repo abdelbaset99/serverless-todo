@@ -1,0 +1,37 @@
+name: Deploy to AWS
+
+on:
+  push:
+    branches:
+      - main  # Trigger on commits to the main branch
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    # 1. Check out the code from GitHub
+    - name: Checkout Code
+      uses: actions/checkout@v3
+
+    # 2. Configure AWS Credentials
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ secrets.AWS_REGION }}
+
+    # 3. Deploy Backend (Lambda)
+    - name: Deploy Lambda Function
+      run: |
+        cd backend
+        zip -r lambda_package.zip lambda_function.py
+        aws lambda update-function-code --function-name ${{ secrets.LAMBDA_FUNCTION_NAME }} --zip-file fileb://lambda_package.zip
+        echo "Lambda deployment complete."
+
+    # 4. Deploy Frontend (S3)
+    - name: Deploy Frontend to S3
+      run: |
+        aws s3 sync ./frontend s3://${{ secrets.S3_BUCKET_NAME }} --delete
+        echo "Frontend deployment complete."
