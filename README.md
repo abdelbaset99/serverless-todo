@@ -47,3 +47,23 @@ The API is exposed via a single resource endpoint: `/todos`
 {
   "task": "Buy groceries"
 }
+```
+
+### 3. Update Task
+**PUT** `/todos`
+*  Supports updating text, status, or both.
+```json
+{
+  "id": "uuid-string-here",
+  "task": "Buy organic groceries",
+  "status": "completed"
+}
+```
+
+### 4. Delete Task
+**DELETE** `/todos`
+```json
+{
+  "id": "uuid-string-here"
+}
+```
