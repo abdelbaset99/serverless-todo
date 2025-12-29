@@ -1,40 +1,105 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Serverless To-Do</title>
     <style>
-        body { font-family: sans-serif; max-width: 600px; margin: 2rem auto; padding: 0 1rem; }
-        
+        body {
+            font-family: sans-serif;
+            max-width: 600px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
         /* Input Styling */
-        input[type="text"] { padding: 8px; font-size: 16px; border: 1px solid #ddd; border-radius: 4px; }
-        #taskInput { width: 65%; }
-        
+        input[type="text"] {
+            padding: 8px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        #taskInput {
+            width: 65%;
+        }
+
         /* Edit Mode Input */
-        .edit-input { width: 60%; margin-right: 10px; }
+        .edit-input {
+            width: 60%;
+            margin-right: 10px;
+        }
 
         /* Buttons */
-        button { padding: 8px 12px; cursor: pointer; color: white; border: none; border-radius: 4px; margin-left: 5px; font-size: 14px; }
-        .add-btn { background: #0073e6; width: 25%; }
-        
+        button {
+            padding: 8px 12px;
+            cursor: pointer;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            margin-left: 5px;
+            font-size: 14px;
+        }
+
+        .add-btn {
+            background: #0073e6;
+            width: 25%;
+        }
+
         /* Action Buttons */
-        .delete-btn { background: #cc0000; }
-        .edit-btn { background: #f0ad4e; }
-        .save-btn { background: #28a745; } /* Green */
-        .cancel-btn { background: #6c757d; } /* Gray */
+        .delete-btn {
+            background: #cc0000;
+        }
+
+        .edit-btn {
+            background: #f0ad4e;
+        }
+
+        .save-btn {
+            background: #28a745;
+        }
+
+        /* Green */
+        .cancel-btn {
+            background: #6c757d;
+        }
+
+        /* Gray */
 
         /* List Layout */
-        ul { list-style: none; padding: 0; }
-        li { background: #f4f4f4; margin: 8px 0; padding: 15px; display: flex; align-items: center; justify-content: space-between; border-radius: 5px; }
-        
-        .todo-content { display: flex; align-items: center; gap: 10px; flex-grow: 1; }
-        .completed { text-decoration: line-through; color: #888; }
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        li {
+            background: #f4f4f4;
+            margin: 8px 0;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-radius: 5px;
+        }
+
+        .todo-content {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-grow: 1;
+        }
+
+        .completed {
+            text-decoration: line-through;
+            color: #888;
+        }
     </style>
 </head>
+
 <body>
     <h1>My Serverless To-Do List</h1>
-    
+
     <!-- Header Input -->
     <div style="margin-bottom: 20px;">
         <input type="text" id="taskInput" placeholder="Enter a new task...">
@@ -46,7 +111,7 @@
 
     <script>
         // REPLACE THIS URL with your API Gateway URL
-        const API_URL = 'https://YOUR_ID.execute-api.us-east-1.amazonaws.com/prod/todos';
+        const API_URL = 'https://obgdqu2zg0.execute-api.eu-north-1.amazonaws.com/prod';
 
         // State Management
         let todos = [];       // Store data locally to re-render UI quickly
@@ -69,7 +134,7 @@
 
             // Optimistic UI update (optional, but makes it feel faster)
             input.value = '';
-            
+
             await fetch(API_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -80,8 +145,8 @@
 
         // 3. Delete Data
         async function deleteTodo(id) {
-            if(!confirm("Delete this task?")) return;
-            
+            if (!confirm("Delete this task?")) return;
+
             await fetch(API_URL, {
                 method: 'DELETE',
                 body: JSON.stringify({ id: id })
@@ -105,11 +170,11 @@
         function startEdit(id) {
             editingId = id;
             renderList(); // Re-render to show input field
-            
+
             // Auto-focus the input
             setTimeout(() => {
                 const input = document.getElementById(`edit-input-${id}`);
-                if(input) input.focus();
+                if (input) input.focus();
             }, 50);
         }
 
@@ -131,12 +196,12 @@
 
             // Exit edit mode immediately for better UX
             editingId = null;
-            
+
             await fetch(API_URL, {
                 method: 'PUT',
-                body: JSON.stringify({ 
-                    id: id, 
-                    task: newTask 
+                body: JSON.stringify({
+                    id: id,
+                    task: newTask
                 })
             });
             fetchTodos(); // Get fresh data
@@ -146,13 +211,13 @@
         function renderList() {
             const list = document.getElementById('todoList');
             list.innerHTML = '';
-            
+
             // Sort: Pending items first
             todos.sort((a, b) => (a.status === 'completed') - (b.status === 'completed'));
 
             todos.forEach(item => {
                 const li = document.createElement('li');
-                
+
                 // CHECK: Are we editing THIS item?
                 if (item.id === editingId) {
                     // --- EDIT MODE UI ---
@@ -167,7 +232,7 @@
                     // --- VIEW MODE UI ---
                     const isChecked = item.status === 'completed' ? 'checked' : '';
                     const textClass = item.status === 'completed' ? 'completed' : '';
-                    
+
                     li.innerHTML = `
                         <div class="todo-content">
                             <input type="checkbox" ${isChecked} onchange="toggleStatus('${item.id}', '${item.status}')">
@@ -187,4 +252,5 @@
         fetchTodos();
     </script>
 </body>
+
 </html>
